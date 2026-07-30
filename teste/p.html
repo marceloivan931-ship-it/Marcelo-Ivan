@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Estacionamento Premium</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #1a202c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            color: #2b6cb0;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .price-badge {
+            background-color: #ebf8ff;
+            border: 1px solid #bee3f8;
+            color: #2b6cb0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .dashboard {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-left: 5px solid #3182ce;
+        }
+
+        .card.success { border-left-color: #38a169; }
+        .card.info { border-left-color: #805ad5; }
+
+        .card-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #718096;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-top: 5px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 25px;
+            width: 100%;
+            max-width: 1200px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .box {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            flex: 1;
+            min-width: 350px;
+        }
+
+        .box-wide {
+            flex: 2;
+            min-width: 500px;
+        }
+
+        .box h2 {
+            font-size: 1.3rem;
+            color: #2d3748;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .form-group label {
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+        }
+
+        .form-group.invalid input {
+            border-color: #e53e3e;
+            background-color: #fff5f5;
+        }
+
+        .form-group.invalid input:focus {
+            box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15);
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .form-group.invalid .error-message {
+            display: block;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #2b6cb0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 350px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: #edf2f7;
+            color: #4a5568;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .btn-delete {
+            background-color: #e53e3e;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            width: auto;
+        }
+
+        .btn-delete:hover {
+            background-color: #c53030;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #a0aec0;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        .history-section {
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 25px;
+        }
+
+        .badge-value {
+            color: #38a169;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🚗 Controle de Estacionamento</h1>
+        <div class="price-badge">1ª Hora: R$ 12,00 | Horas Adicionais: R$ 6,00/h</div>
+    </header>
+
+    <div class="dashboard">
+        <div class="card">
+            <span class="card-title">Carros no Pátio</span>
+            <div id="count-active" class="card-value">0</div>
+        </div>
+        <div class="card success">
+            <span class="card-title">Faturamento Total do Dia</span>
+            <div id="total-revenue" class="card-value">R$ 0,00</div>
+        </div>
+        <div class="card info">
+            <span class="card-title">Atendimentos Finalizados</span>
+            <div id="count-history" class="card-value">0</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <section class="box">
+            <h2>Cadastrar Veículo</h2>
+            <form id="parking-form" novalidate>
+                <div class="form-group" id="group-owner">
+                    <label for="owner">Nome do Proprietário</label>
+                    <input type="text" id="owner" placeholder="Ex: João Silva">
+                    <span class="error-message">Por favor, insira o nome completo ou Sobrenome.</span>
+                </div>
+                <div class="form-group" id="group-model">
+                    <label for="model">Modelo do Carro</label>
+                    <input type="text" id="model" placeholder="Ex: Honda Civic">
+                    <span class="error-message">Insira a marca ou o modelo do veículo.</span>
+                </div>
+                <div class="form-group" id="group-plate">
+                    <label for="plate">Placa (Padrão Antigo ou Mercosul)</label>
+                    <input type="text" id="plate" placeholder="Ex: ABC1D23 ou ABC1234" maxlength="8">
+                    <span class="error-message">A placa precisa ter exatamente 7 caracteres válidos.</span>
+                </div>
+                <button type="submit">Dar Entrada</button>
+            </form>
+        </section>
+
+        <section class="box box-wide">
+            <h2>Veículos Estacionados</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Proprietário</th>
+                            <th>Modelo</th>
+                            <th>Placa</th>
+                            <th>Entrada</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="garage"></tbody>
+                </table>
+                <div id="empty-notification" class="empty-msg">Nenhum veículo no pátio ativo.</div>
+            </div>
+        </section>
+    </div>
+
+    <div class="history-section box">
+        <h2>Histórico de Saídas (Hoje)</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Placa</th>
+                        <th>Modelo</th>
+                        <th>Permanência</th>
+                        <th>Horário Saída</th>
+                        <th>Valor Pago</th>
+                    </tr>
+                </thead>
+                <tbody id="history-log"></tbody>
+            </table>
+            <div id="empty-history-notification" class="empty-msg">Nenhuma saída registrada ainda.</div>
+        </div>
+    </div>
+
+    <script>
+        const PRECO_PRIMEIRA_HORA = 12.00;
+        const PRECO_HORA_ADICIONAL = 6.00;
+
+        const form = document.getElementById('parking-form');
+        const plateInput = document.getElementById('plate');
+
+        plateInput.addEventListener('input', (e) => {
+            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (value.length > 3 && !isNaN(value.slice(-1))) {
+                value = value.slice(0, 3) + '-' + value.slice(3, 7);
+            } else {
+                value = value.slice(0, 7);
+            }
+            e.target.value = value;
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAll();
+        });
+
+        function getData() {
+            return {
+                active: JSON.parse(localStorage.getItem('parking_active')) || [],
+                history: JSON.parse(localStorage.getItem('parking_history')) || []
+            };
+        }
+
+        function saveData(active, history) {
+            localStorage.setItem('parking_active', JSON.stringify(active));
+            localStorage.setItem('parking_history', JSON.stringify(history));
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const owner = document.getElementById('owner').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const plate = plateInput.value.replace('-', '').trim();
+
+            if (owner.length < 3) {
+                document.getElementById('group-owner').classList.add('invalid');
+                isValid = false;
+            } else {
+                document.getElementById('group-owner').classList.remove('invalid');
+            }
+
+            if (model.length < 2) {
+                document.getElementById('group-model').classList.add('invalid');
+                isValid = false;
+            } else {
+                document.getElementById('group-model').classList.remove('invalid');
+            }
+
+            if (plate.length !== 7) {
+                document.getElementById('group-plate').classList.add('invalid');
+                isValid = false;
+            } else {
+                document.getElementById('group-plate').classList.remove('invalid');
+            }
+
+            return isValid;
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!validateForm()) return;
+
+            const owner = document.getElementById('owner').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const plate = plateInput.value.toUpperCase().trim();
+
+            const { active, history } = getData();
+            active.push({
+                id: Date.now().toString(),
+                owner,
+                model,
+                plate,
+                entryTime: new Date().toISOString()
+            });
+            saveData(active, history);
+            renderAll();
+            form.reset();
+            document.getElementById('owner').focus();
+        });
+
+        function calculatePrice(minutes) {
+            if (minutes <= 60) {
+                return PRECO_PRIMEIRA_HORA;
+            } else {
+                const extraMinutes = minutes - 60;
+                const extraPrice = (extraMinutes / 60) * PRECO_HORA_ADICIONAL;
+                return PRECO_PRIMEIRA_HORA + extraPrice;
+            }
+        }
+
+        function checkoutVehicle(id) {
+            const { active, history } = getData();
+            const vehicle = active.find(v => v.id === id);
+            if (!vehicle) return;
+
+            const entryTime = new Date(vehicle.entryTime);
+            const exitTime = new Date();
+            const diffMinutes = Math.floor((exitTime - entryTime) / 1000 / 60);
+            const billableMinutes = diffMinutes > 0 ? diffMinutes : 1;
+            const finalPrice = calculatePrice(billableMinutes);
+            
+            const timeString = billableMinutes >= 60
+                ? Math.floor(billableMinutes / 60) + 'h e ' + (billableMinutes % 60) + 'm'
+                : billableMinutes + ' min';
+
+            const confirmation = confirm(
+                'CONFIRMAÇÃO DE SAÍDA\n\n' +
+                'Carro: ' + vehicle.model + ' | Placa: ' + vehicle.plate + '\n' +
+                'Permanência: ' + timeString + '\n' +
+                'Valor Total: R$ ' + finalPrice.toFixed(2).replace('.', ',') + '\n\n' +
+                'Deseja registrar o pagamento e liberar a vaga?'
+            );
+
+            if (confirmation) {
+                const newActive = active.filter(v => v.id !== id);
+                history.push({
+                    plate: vehicle.plate,
+                    model: vehicle.model,
+                    duration: timeString,
+                    exitTime: exitTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+                    price: finalPrice
+                });
+                saveData(newActive, history);
+                renderAll();
+            }
+        }
+
+        function renderAll() {
+            const { active, history } = getData();
+
+            const garage = document.getElementById('garage');
+            garage.innerHTML = '';
+            document.getElementById('empty-notification').style.display = active.length === 0 ? 'block' : 'none';
+
+            active.forEach(v => {
+                const formattedTime = new Date(v.entryTime).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                const row = document.createElement('tr');
+                row.innerHTML = 
+                    '<td>' + v.owner + '</td>' +
+                    '<td>' + v.model + '</td>' +
+                    '<td><strong>' + v.plate + '</strong></td>' +
+                    '<td>' + formattedTime + '</td>' +
+                    '<td><button class="btn-delete" onclick="checkoutVehicle(\'' + v.id + '\')">Dar Saída</button></td>';
+                garage.appendChild(row);
+            });
+
+            const historyLog = document.getElementById('history-log');
+            historyLog.innerHTML = '';
+            document.getElementById('empty-history-notification').style.display = history.length === 0 ? 'block' : 'none';
+            let totalRevenue = 0;
+
+            history.forEach(h => {
+                totalRevenue += h.price;
+                const row = document.createElement('tr');
+                row.innerHTML = 
+                    '<td><strong>' + h.plate + '</strong></td>' +
+                    '<td>' + h.model + '</td>' +
+                    '<td>' + h.duration + '</td>' +
+                    '<td>' + h.exitTime + '</td>' +
+                    '<td class="badge-value">R$ ' + h.price.toFixed(2).replace('.', ',') + '</td>';
+                historyLog.appendChild(row);
+            });
+
+            document.getElementById('count-active').innerText = active.length;
+            document.getElementById('count-history').innerText = history.length;
+            document.getElementById('total-revenue').innerText = 'R$ ' + totalRevenue.toFixed(2).replace('.', ',');
+        }
+    </script>
+</body>
+</html>
